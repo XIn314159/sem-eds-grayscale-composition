@@ -1,22 +1,22 @@
 # sem-eds-grayscale-composition
 
-Python tool for converting SEM grayscale images into Ti/(Ti+Fe) composition maps using EDS calibration, with LOOCV error estimation.
+Python tool for converting SEM grayscale images into EDS-calibrated composition maps, with LOOCV error estimation.
 
-以 EDS 點分析結果校正 SEM 影像的灰階值，將整張背向散射電子（BSE）影像轉換為 Ti/(Ti+Fe) 成分分布圖，並用留一交叉驗證（LOOCV）與逐像素預測區間評估結果的可靠程度。
+以 EDS 點分析結果校正 SEM 影像的灰階值，將整張背向散射電子（BSE）影像轉換為連續的成分分布圖，並用留一交叉驗證（LOOCV）與逐像素預測區間評估結果的可靠程度。
 
 ---
 
-## 解決什麼問題
+## 這個工具做什麼
 
-在鈦磁鐵礦（Fe₃₋ₓTiₓO₄）樣品的 SEM／EDS 分析中，BSE 影像的灰階反映平均原子序（Z-contrast），Ti 含量不同的區域會呈現不同亮度。但 EDS 是逐點量測，一張影像只能得到少數幾個點的成分，要判斷整體組成是否均勻，只能靠人眼比對灰階，而人眼可分辨的灰階層級有限，逐點比對也相當耗時。
+SEM 的 BSE（背向散射電子）影像，灰階反映的是局部平均原子序（Z-contrast），但 EDS 只能逐點量測成分。要看整張影像的成分分布，通常只能靠人眼比對灰階深淺，而人眼可分辨的灰階層級有限，逐點比對也相當耗時。
 
 這個工具做的事情是：
 
-1. 以影像上已標記 EDS 量測位置的黃色十字為校正點，建立「灰階值 ↔ Ti/(Ti+Fe)」的校正關係。
+1. 以影像上已標記 EDS 量測位置的黃色十字為校正點，建立「灰階值 ↔ EDS 成分比例」的校正關係。
 2. 用這條關係把整張影像的灰階換算成連續的成分分布圖。
 3. 同時回報這個換算「可信到什麼程度」：LOOCV 誤差、逐像素預測區間，以及超出校正範圍的外插區域。
 
-除成分估計外，程式也會計算各灰階類別的面積占比（Part A），可用來量化樣品內不同相或組成區域所占的比例，即使沒有 EDS 數據也能單獨執行。
+除成分估計外，程式也會計算各灰階類別的面積占比（Part A），可用來量化影像中不同灰階區域所占的比例，即使沒有 EDS 數據也能單獨執行。程式內建以某兩種元素的比例（如 Ti/(Ti+Fe)）作為校正目標，只要 EDS 表格提供對應欄位，即可套用在不同影像上。
 
 ## 方法流程
 
@@ -24,8 +24,8 @@ Python tool for converting SEM grayscale images into Ti/(Ti+Fe) composition maps
 SEM 影像（含黃色十字＋綠色點號標籤）        EDS 匯出 .xlsx
         │                                        │
         ▼                                        ▼
- ① 偵測黃色十字位置                       ④ 讀取每點 Ti、Fe，
-   （min(R,G) − B 的相對黃度，                計算 Ti/(Ti+Fe)，
+ ① 偵測黃色十字位置                       ④ 讀取每點對應元素含量，
+   （min(R,G) − B 的相對黃度，                計算元素比例，
     對 JPEG 壓縮造成的褪色具穩健性）           重複量測的點取平均
         │                                        │
         ▼                                        │
@@ -40,22 +40,18 @@ SEM 影像（含黃色十字＋綠色點號標籤）        EDS 匯出 .xlsx
                        ▼
         ⑤ 建立分析遮罩：排除黑色背景、儀器資訊列、比例尺、標記像素
            · 背景 = 灰階低於直方圖第一個谷值，且「與影像邊界相連」
-             （樣品內部被包圍的孔隙／裂隙不會被誤判為背景）
+             （影像內部被包圍的孔隙／裂隙不會被誤判為背景）
            · 資訊列／比例尺 = OCR 偵測文字＋亮線偵測，
              失敗時改為手動指定底部邊界
                        │
                        ▼
-        ⑥ 線性校正：Ti/(Ti+Fe) = a × gray + b
+        ⑥ 線性校正：元素比例 = a × gray + b
            回報 R²、p 值、樣本內 RMSE、LOOCV RMSE
                        │
                        ▼
         ⑦ 輸出面積占比統計、成分分布圖、校正曲線圖、
            逐像素 95% 預測區間圖、外插區域標示
 ```
-
-### 如何評估可靠度
-
-程式輸出三種不同層面的誤差，意義各不相同：
 
 | 指標 | 意義 | 何時參考 |
 |---|---|---|
@@ -70,7 +66,7 @@ SEM 影像（含黃色十字＋綠色點號標籤）        EDS 匯出 .xlsx
 | 項目 | 數值 |
 |---|---|
 | 校正點數 n | 〔執行後由 `analysis_metadata.json` 的 `calibration.n_points` 填入〕 |
-| 校正範圍（Ti/(Ti+Fe)） | 〔`calibration.ti_ratio_range`〕 |
+| 校正範圍（元素比例） | 〔`calibration.ti_ratio_range`〕 |
 | R² / p 值 | 〔`calibration.r2` / `calibration.p_value`〕 |
 | 樣本內 RMSE | 〔`calibration.rmse_in_sample` × 100，個百分點〕 |
 | **LOOCV RMSE** | 〔`calibration.loocv_rmse` × 100，個百分點〕 |
@@ -85,7 +81,7 @@ SEM 影像（含黃色十字＋綠色點號標籤）        EDS 匯出 .xlsx
 
 1. **校正點很少。** 一張影像通常只有數個校正點，只涵蓋有限的成分與灰階範圍。程式在少於 5 個校正點時會明確警告，這只是流程示範，而非可辯護的校正。
 2. **校正只適用於單張影像。** 灰階取決於該次 SEM 的亮度、對比度與工作條件，不同影像不能共用同一條校正線。
-3. **假設灰階只反映成分。** 未拋光的粉末樣品會有形貌造成的對比（邊緣、傾斜、陰影），這些會混入同一個灰階訊號而無法分離。
+3. **假設灰階只反映成分。** 未拋光的樣品會有形貌造成的對比（邊緣、傾斜、陰影），這些會混入同一個灰階訊號而無法分離。
 4. **外插區域不可信。** 灰階超出校正範圍的像素，校正對它們沒有任何約束，圖上以灰色標示而不給顏色。
 5. **有效樣本數是校正點數，不是像素數。** 統計檢定的自由度來自校正點，不會因為影像有數百萬個像素而增加，也不會因為成分圖看起來平滑就更可信。
 6. **空間解析度不匹配。** EDS 的作用體積（約 1 µm 或更大）遠大於單一像素，點分析得到的是一個範圍的平均組成。
@@ -100,7 +96,7 @@ SEM 影像（含黃色十字＋綠色點號標籤）        EDS 匯出 .xlsx
 - Python 3.9 以上
 - 套件：見 `requirements.txt`（`opencv-python`、`numpy`、`pandas`、`matplotlib`、`scipy`、`Pillow`、`openpyxl`；`pytesseract` 為選用）
 - **Tesseract OCR**（選用）：用於自動讀取十字旁的點號、偵測儀器資訊列與比例尺。未安裝或安裝失敗時，程式會自動退回手動模式：資訊列由使用者輸入要排除的像素高度，點號需在腳本開頭的 `MANUAL_POINT_OVERRIDE` 中手動指定。
-  - Windows 安裝後，程式會依序在 `C:\Program Files\Tesseract-OCR\`、系統 PATH 及其他常見路徑中尋找。
+  - Windows 安裝後，程式會依序在系統常見安裝路徑與 PATH 中尋找。
   - 需要有 `tessdata/eng.traineddata` 語言資料，光有執行檔會報錯。
 
 ```bash
@@ -112,7 +108,7 @@ pip install -r requirements.txt
 | 檔案 | 要求 |
 |---|---|
 | SEM 影像（png／jpg） | 以黃色「＋」標記 EDS 量測位置，每個十字左上方有綠色的點號標籤；下方通常有儀器資訊列或比例尺 |
-| EDS 匯出表（.xlsx） | 需包含 `Spectrum`、`Ti`、`Fe` 三欄；`Spectrum` 欄以 `<編號>.spx` 結尾；同一點有多次量測時自動取平均 |
+| EDS 匯出表（.xlsx） | 需包含 `Spectrum` 及對應的元素欄位；`Spectrum` 欄以 `<編號>.spx` 結尾；同一點有多次量測時自動取平均 |
 
 EDS 表可省略（直接按 Enter 略過），此時只會執行 Part A 的面積占比分析，不做成分校正。
 
@@ -142,7 +138,7 @@ python src/sem_analysis.py
 | `histogram.png`、`classified_image.png` | 灰階直方圖與各類別的面積占比、分類地圖 |
 | `results.csv` | 各灰階類別的像素數、面積占比與對應 EDS 成分（Part A） |
 | `calibration_points.csv`、`calibration_fit.png` | 校正點資料與校正曲線（Part B） |
-| `composition_map.png` | Ti/(Ti+Fe) 成分分布圖（外插區域以灰色標示） |
+| `composition_map.png` | 校正後的元素比例分布圖（外插區域以灰色標示） |
 | `uncertainty_map.png` | 逐像素 95% 預測區間半寬 |
 | `analysis_metadata.json` | 所有參數、統計結果與校正細節，方便重現與引用 |
 | `detected_crosses_debug.png` | 只有點號比對失敗時才會產生，顯示各十字的放大圖與 OCR 讀值 |
