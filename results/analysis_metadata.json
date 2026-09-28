@@ -1,0 +1,157 @@
+{
+  "image": "0729-2_002.jpg",
+  "image_path": "d:\\SEM\\20260902\\0729-2_002.jpg",
+  "eds_file": "d:\\SEM\\20260902\\0729-2_002.xlsx",
+  "image_size": {
+    "width": 1024,
+    "height": 768
+  },
+  "ocr": {
+    "tesseract": "D:\\SEMANALYSIS\\li\\tesseract.exe (language data: D:\\SEMANALYSIS\\tessdata)",
+    "used_for_info_bar": true,
+    "manual_info_bar_margin_px": 0,
+    "extra_bottom_margin_px": 40,
+    "manual_point_override": {}
+  },
+  "num_crosses_detected": 4,
+  "cross_positions": [
+    [
+      777.8,
+      149.8
+    ],
+    [
+      469.2,
+      223.3
+    ],
+    [
+      681.0,
+      673.3
+    ],
+    [
+      735.0,
+      223.8
+    ]
+  ],
+  "cross_gray_values": [
+    135,
+    159,
+    160,
+    202
+  ],
+  "cross_eds_points": [
+    4,
+    3,
+    2,
+    1
+  ],
+  "num_classes": 4,
+  "classification_method": "nearest_reference",
+  "class_gray_ranges": [
+    [
+      0,
+      147
+    ],
+    [
+      148,
+      159
+    ],
+    [
+      160,
+      181
+    ],
+    [
+      182,
+      255
+    ]
+  ],
+  "background_threshold": 47,
+  "background_threshold_auto": 47,
+  "background_peak_gray": 14,
+  "settings": {
+    "colored_pixel_threshold": 30,
+    "marker_roi_half_size": 3,
+    "yellowness_threshold": 50,
+    "min_cross_area": 100
+  },
+  "pixel_counts": {
+    "total": 786432,
+    "background": 319726,
+    "background_outside_info_bar": 298568,
+    "internal_low_gray_kept_as_foreground": 48044,
+    "info_bar": 42355,
+    "marker_outside_background_and_info_bar": 4692,
+    "foreground_analyzed": 440817
+  },
+  "foreground_gray_stats": {
+    "mean": 134.8878378102478,
+    "median": 148.0,
+    "sd": 60.469160266380996
+  },
+  "class_pixel_counts": [
+    219494,
+    30506,
+    53025,
+    137792
+  ],
+  "class_percentages": [
+    49.79254429842769,
+    6.9203320198631175,
+    12.02880106710948,
+    31.25832261459971
+  ],
+  "calibration": {
+    "status": "done",
+    "n_points": 4,
+    "slope": -0.004719933904024527,
+    "intercept": 0.9414874807366858,
+    "r": -0.9698120637765424,
+    "r2": 0.9405354390465164,
+    "p_value": 0.03018793622345761,
+    "rmse_in_sample": 0.0286188581950514,
+    "mae_in_sample": 0.026830804115041167,
+    "loocv_rmse": 0.09160701873647574,
+    "gray_range": [
+      135,
+      202
+    ],
+    "ti_ratio_range": [
+      0.007504428282940772,
+      0.3385144157642473
+    ],
+    "estimate_spatial_mean_pct": 30.48258018155357,
+    "estimate_spatial_sd_pct": 28.54104396891844,
+    "extrapolated_pixels": 237046,
+    "extrapolated_percent": 53.774241918982256,
+    "median_pi_halfwidth_pct": 23.818709879062702,
+    "points": [
+      {
+        "point": 1,
+        "x": 735.0,
+        "y": 223.8,
+        "gray": 202,
+        "Ti_ratio": 0.007504428282940772
+      },
+      {
+        "point": 2,
+        "x": 681.0,
+        "y": 673.3,
+        "gray": 160,
+        "Ti_ratio": 0.1714557109476962
+      },
+      {
+        "point": 3,
+        "x": 469.2,
+        "y": 223.3,
+        "gray": 159,
+        "Ti_ratio": 0.15219872691176864
+      },
+      {
+        "point": 4,
+        "x": 777.8,
+        "y": 149.8,
+        "gray": 135,
+        "Ti_ratio": 0.3385144157642473
+      }
+    ]
+  }
+}
